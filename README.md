@@ -16,8 +16,8 @@ se recupera de los errores y recuerda la conversación entre ejecuciones gracias
 Requisitos: Python 3.12 o superior y una API key de Gemini (gratis en <https://aistudio.google.com/apikey>).
 
 ```bash
-git clone <url-de-este-repo>
-cd <carpeta-del-repo>
+git clone <git remote add origin https://github.com/luciaariasdanna/PreEntrega5-ReAct-memoria.git>
+cd <PreEntrega5-ReAct-memoria>
 python -m venv .venv
 ```
 

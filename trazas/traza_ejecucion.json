@@ -1,0 +1,316 @@
+{
+  "generado": "2026-10-07T11:10:35",
+  "modelo": "gemini-flash-lite-latest",
+  "recursion_limit": 10,
+  "escenarios": {
+    "1_multi_paso_y_memoria": {
+      "descripcion": "Multi-paso: el agente necesita 2 herramientas (nombre -> id -> pedidos). Después, con el mismo thread_id y tras reabrir el checkpointer, '¿y el último?' solo tiene sentido si recuerda de qué cliente se hablaba.",
+      "turnos": [
+        {
+          "thread_id": "demo-multi-paso",
+          "pregunta": "¿Cuántos pedidos tuvo Ana García y cuál fue el total?",
+          "respuesta": "Ana García tuvo 3 pedidos y el total gastado es de $14.500.",
+          "llamadas_a_herramientas": 2,
+          "pasos": [
+            {
+              "tipo": "HumanMessage",
+              "contenido": "¿Cuántos pedidos tuvo Ana García y cuál fue el total?"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_cliente_por_nombre",
+                  "argumentos": {
+                    "nombre": "Ana García"
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"nombre\": \"Ana García\", \"cliente_id\": 102}",
+              "herramienta": "buscar_cliente_por_nombre",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_pedidos",
+                  "argumentos": {
+                    "cliente_id": 102
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"cliente_id\": 102, \"pedidos\": 3, \"total\": 14500}",
+              "herramienta": "buscar_pedidos",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "Ana García tuvo 3 pedidos y el total gastado es de $14.500."
+            }
+          ]
+        },
+        {
+          "thread_id": "demo-multi-paso",
+          "pregunta": "¿Y el último?",
+          "respuesta": "Su último pedido fue el número 9045, realizado el 21/09/2026 por un monto de $4.200. Actualmente se encuentra **en camino**.",
+          "llamadas_a_herramientas": 1,
+          "pasos": [
+            {
+              "tipo": "HumanMessage",
+              "contenido": "¿Y el último?"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "obtener_ultimo_pedido",
+                  "argumentos": {
+                    "cliente_id": 102
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"cliente_id\": 102, \"pedido_id\": 9045, \"fecha\": \"2026-09-21\", \"monto\": 4200, \"estado\": \"en camino\"}",
+              "herramienta": "obtener_ultimo_pedido",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "Su último pedido fue el número 9045, realizado el 21/09/2026 por un monto de $4.200. Actualmente se encuentra **en camino**."
+            }
+          ]
+        },
+        {
+          "thread_id": "demo-multi-paso",
+          "pregunta": "¿Y Juan Pérez?",
+          "respuesta": "Juan Pérez tuvo 1 pedido y el total gastado es de $3.200.",
+          "llamadas_a_herramientas": 2,
+          "pasos": [
+            {
+              "tipo": "HumanMessage",
+              "contenido": "¿Y Juan Pérez?"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_cliente_por_nombre",
+                  "argumentos": {
+                    "nombre": "Juan Pérez"
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"nombre\": \"Juan Pérez\", \"cliente_id\": 205}",
+              "herramienta": "buscar_cliente_por_nombre",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_pedidos",
+                  "argumentos": {
+                    "cliente_id": 205
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"cliente_id\": 205, \"pedidos\": 1, \"total\": 3200}",
+              "herramienta": "buscar_pedidos",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "Juan Pérez tuvo 1 pedido y el total gastado es de $3.200."
+            }
+          ]
+        }
+      ]
+    },
+    "2_ciclo_de_retorno_reintento": {
+      "descripcion": "La herramienta devuelve error por una tilde faltante ('Garcia') con una sugerencia; el agente hace un segundo intento con el nombre corregido.",
+      "turnos": [
+        {
+          "thread_id": "demo-reintento",
+          "pregunta": "¿Cuánto gastó en total Ana Garcia?",
+          "respuesta": "Ana García gastó un total de $14.500 en sus 3 pedidos.",
+          "llamadas_a_herramientas": 3,
+          "pasos": [
+            {
+              "tipo": "HumanMessage",
+              "contenido": "¿Cuánto gastó en total Ana Garcia?"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_cliente_por_nombre",
+                  "argumentos": {
+                    "nombre": "Ana Garcia"
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"error\": \"No existe ningún cliente registrado con el nombre 'Ana Garcia'.\", \"sugerencias\": [\"Ana García\"]}",
+              "herramienta": "buscar_cliente_por_nombre",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_cliente_por_nombre",
+                  "argumentos": {
+                    "nombre": "Ana García"
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"nombre\": \"Ana García\", \"cliente_id\": 102}",
+              "herramienta": "buscar_cliente_por_nombre",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_pedidos",
+                  "argumentos": {
+                    "cliente_id": 102
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"cliente_id\": 102, \"pedidos\": 3, \"total\": 14500}",
+              "herramienta": "buscar_pedidos",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "Ana García gastó un total de $14.500 en sus 3 pedidos."
+            }
+          ]
+        }
+      ]
+    },
+    "3_ciclo_de_retorno_aclaracion": {
+      "descripcion": "El cliente no existe y no hay sugerencias: el agente pide aclaración en lugar de inventar. El usuario aclara en el turno siguiente y el agente completa la tarea.",
+      "turnos": [
+        {
+          "thread_id": "demo-aclaracion",
+          "pregunta": "¿Cuántos pedidos tuvo Roberto Sánchez?",
+          "respuesta": "No encontré ningún cliente registrado con el nombre \"Roberto Sánchez\". ¿Podrías verificar el nombre o intentar con otro?",
+          "llamadas_a_herramientas": 1,
+          "pasos": [
+            {
+              "tipo": "HumanMessage",
+              "contenido": "¿Cuántos pedidos tuvo Roberto Sánchez?"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_cliente_por_nombre",
+                  "argumentos": {
+                    "nombre": "Roberto Sánchez"
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"error\": \"No existe ningún cliente registrado con el nombre 'Roberto Sánchez'.\", \"sugerencias\": []}",
+              "herramienta": "buscar_cliente_por_nombre",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "No encontré ningún cliente registrado con el nombre \"Roberto Sánchez\". ¿Podrías verificar el nombre o intentar con otro?"
+            }
+          ]
+        },
+        {
+          "thread_id": "demo-aclaracion",
+          "pregunta": "Perdón, quise decir María López.",
+          "respuesta": "María López tuvo 5 pedidos en total, sumando un monto gastado de $27.800.",
+          "llamadas_a_herramientas": 2,
+          "pasos": [
+            {
+              "tipo": "HumanMessage",
+              "contenido": "Perdón, quise decir María López."
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_cliente_por_nombre",
+                  "argumentos": {
+                    "nombre": "María López"
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"nombre\": \"María López\", \"cliente_id\": 310}",
+              "herramienta": "buscar_cliente_por_nombre",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "",
+              "tool_calls": [
+                {
+                  "nombre": "buscar_pedidos",
+                  "argumentos": {
+                    "cliente_id": 310
+                  }
+                }
+              ]
+            },
+            {
+              "tipo": "ToolMessage",
+              "contenido": "{\"cliente_id\": 310, \"pedidos\": 5, \"total\": 27800}",
+              "herramienta": "buscar_pedidos",
+              "status": "success"
+            },
+            {
+              "tipo": "AIMessage",
+              "contenido": "María López tuvo 5 pedidos en total, sumando un monto gastado de $27.800."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

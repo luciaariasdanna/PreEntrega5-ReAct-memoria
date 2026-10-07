@@ -1,0 +1,13 @@
+# Secretos: NUNCA subir la API key
+.env
+
+# Entorno virtual y caches
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+
+# Base de checkpoints local (se regenera al correr)
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

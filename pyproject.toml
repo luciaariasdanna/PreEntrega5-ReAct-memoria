@@ -1,0 +1,9 @@
+[project]
+name = "agente-react-memoria"
+version = "0.1.0"
+description = "Agente ReAct cíclico con memoria persistente (LangGraph + Gemini + SQLite)"
+requires-python = ">=3.12"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true

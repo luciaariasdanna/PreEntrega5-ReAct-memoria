@@ -1,0 +1,68 @@
+### 1_multi_paso_y_memoria
+# Multi-paso: el agente necesita 2 herramientas (nombre -> id -> pedidos). Después, con el mismo thread_id y tras reabrir el checkpointer, '¿y el último?' solo tiene sentido si recuerda de qué cliente se hablaba.
+
+[thread_id=demo-multi-paso]
+Usuario: "¿Cuántos pedidos tuvo Ana García y cuál fue el total?"
+  -> El agente decide usar la herramienta: buscar_cliente_por_nombre(nombre='Ana García')
+  -> La herramienta devuelve: {"nombre": "Ana García", "cliente_id": 102}
+  -> El agente decide usar la herramienta: buscar_pedidos(cliente_id=102)
+  -> La herramienta devuelve: {"cliente_id": 102, "pedidos": 3, "total": 14500}
+  -> El agente razona: no necesita más herramientas -> responde.
+Respuesta: "Ana García tuvo 3 pedidos y el total gastado es de $14.500."
+(herramientas invocadas en este turno: 2)
+
+[thread_id=demo-multi-paso]
+Usuario: "¿Y el último?"
+  -> El agente decide usar la herramienta: obtener_ultimo_pedido(cliente_id=102)
+  -> La herramienta devuelve: {"cliente_id": 102, "pedido_id": 9045, "fecha": "2026-09-21", "monto": 4200, "estado": "en camino"}
+  -> El agente razona: no necesita más herramientas -> responde.
+Respuesta: "Su último pedido fue el número 9045, realizado el 21/09/2026 por un monto de $4.200. Actualmente se encuentra **en camino**."
+(herramientas invocadas en este turno: 1)
+
+[thread_id=demo-multi-paso]
+Usuario: "¿Y Juan Pérez?"
+  -> El agente decide usar la herramienta: buscar_cliente_por_nombre(nombre='Juan Pérez')
+  -> La herramienta devuelve: {"nombre": "Juan Pérez", "cliente_id": 205}
+  -> El agente decide usar la herramienta: buscar_pedidos(cliente_id=205)
+  -> La herramienta devuelve: {"cliente_id": 205, "pedidos": 1, "total": 3200}
+  -> El agente razona: no necesita más herramientas -> responde.
+Respuesta: "Juan Pérez tuvo 1 pedido y el total gastado es de $3.200."
+(herramientas invocadas en este turno: 2)
+
+
+### 2_ciclo_de_retorno_reintento
+# La herramienta devuelve error por una tilde faltante ('Garcia') con una sugerencia; el agente hace un segundo intento con el nombre corregido.
+
+[thread_id=demo-reintento]
+Usuario: "¿Cuánto gastó en total Ana Garcia?"
+  -> El agente decide usar la herramienta: buscar_cliente_por_nombre(nombre='Ana Garcia')
+  -> La herramienta devuelve: {"error": "No existe ningún cliente registrado con el nombre 'Ana Garcia'.", "sugerencias": ["Ana García"]}
+  -> El agente decide usar la herramienta: buscar_cliente_por_nombre(nombre='Ana García')
+  -> La herramienta devuelve: {"nombre": "Ana García", "cliente_id": 102}
+  -> El agente decide usar la herramienta: buscar_pedidos(cliente_id=102)
+  -> La herramienta devuelve: {"cliente_id": 102, "pedidos": 3, "total": 14500}
+  -> El agente razona: no necesita más herramientas -> responde.
+Respuesta: "Ana García gastó un total de $14.500 en sus 3 pedidos."
+(herramientas invocadas en este turno: 3)
+
+
+### 3_ciclo_de_retorno_aclaracion
+# El cliente no existe y no hay sugerencias: el agente pide aclaración en lugar de inventar. El usuario aclara en el turno siguiente y el agente completa la tarea.
+
+[thread_id=demo-aclaracion]
+Usuario: "¿Cuántos pedidos tuvo Roberto Sánchez?"
+  -> El agente decide usar la herramienta: buscar_cliente_por_nombre(nombre='Roberto Sánchez')
+  -> La herramienta devuelve: {"error": "No existe ningún cliente registrado con el nombre 'Roberto Sánchez'.", "sugerencias": []}
+  -> El agente razona: no necesita más herramientas -> responde.
+Respuesta: "No encontré ningún cliente registrado con el nombre "Roberto Sánchez". ¿Podrías verificar el nombre o intentar con otro?"
+(herramientas invocadas en este turno: 1)
+
+[thread_id=demo-aclaracion]
+Usuario: "Perdón, quise decir María López."
+  -> El agente decide usar la herramienta: buscar_cliente_por_nombre(nombre='María López')
+  -> La herramienta devuelve: {"nombre": "María López", "cliente_id": 310}
+  -> El agente decide usar la herramienta: buscar_pedidos(cliente_id=310)
+  -> La herramienta devuelve: {"cliente_id": 310, "pedidos": 5, "total": 27800}
+  -> El agente razona: no necesita más herramientas -> responde.
+Respuesta: "María López tuvo 5 pedidos en total, sumando un monto gastado de $27.800."
+(herramientas invocadas en este turno: 2)
